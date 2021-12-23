@@ -1,4 +1,5 @@
 const express = require("express");
+const res = require("express/lib/response");
 
 const db = require("../data/database");
 
@@ -47,6 +48,19 @@ router.get("/posts/:id", async (req, res) => {
   res.render("post-detail", { post: postData });
 });
 
+router.get("/posts/:id/edit", async (req, res) => {
+  const query = `
+    SELECT * FROM posts WHERE id = ?
+  `;
+  const [posts] = await db.query(query, [req.params.id]);
+
+  if (!posts || posts.length === 0) {
+    return res.status(404).render("404");
+  }
+
+  res.render("update-post", { post: posts[0] });
+});
+
 router.get("/new-post", async (req, res) => {
   const [authors] = await db.query("SELECT * FROM authors");
   res.render("create-post", { authors: authors });
@@ -63,6 +77,22 @@ router.post("/posts", async (req, res) => {
     "INSERT INTO posts(title, summary, body, author_id) VALUES (?)",
     [data]
   );
+
+  res.redirect("/posts");
+});
+
+router.post("/posts/:id/edit", async (req, res) => {
+  const query = `
+    UPDATE posts SET title = ?, summary = ?, body = ?
+    WHERE id = ?
+  `;
+
+  await db.query(query, [
+    req.body.title,
+    req.body.summary,
+    req.body.content,
+    req.params.id,
+  ]);
 
   res.redirect("/posts");
 });
