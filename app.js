@@ -3,6 +3,7 @@ const path = require("path");
 const express = require("express");
 
 const blogRoutes = require("./routes/blog");
+const open = require("open");
 
 const app = express();
 
@@ -20,3 +21,4 @@ app.use(function (error, req, res, next) {
 });
 
 app.listen(3000);
+open("http://localhost:3000");
